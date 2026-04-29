@@ -728,64 +728,63 @@ function renderRooms(){
     $('submitBtn').disabled = !ok;
   }
 
- function submitBooking(){
-    const req = $('requester'), st = $('startTime').value, et = $('endTime').value;
-    const title = $('title').value.trim();
-    const d1 = $('date').value;
-    const d2 = $('endDate').value || d1; // ถ้าไม่เลือกวันสิ้นสุด ให้เป็นวันเดียวกับวันเริ่ม
-    
-    const startD = new Date(d1);
-    const endD = new Date(d2);
-    
-    if(endD < startD) { alert("❌ เลือกวันสิ้นสุดใหม่"); return; }
-    
-    // สร้างตารางเวลาของทุกวันที่ถูกเลือก
-    const schedules = [];
-    let cur = new Date(startD);
-    while(cur <= endD) {
-      const dateStr = `${cur.getFullYear()}-${pad2(cur.getMonth()+1)}-${pad2(cur.getDate())}`;
-      schedules.push({
-         start_ms: new Date(`${dateStr}T${st}:00`).getTime(),
-         end_ms: new Date(`${dateStr}T${et}:00`).getTime()
-      });
-      cur.setDate(cur.getDate() + 1); // บวกเพิ่มทีละ 1 วัน
-    }
-    
-    const payload = {
-      requester_email: req.value,
-      requester_name: req.selectedOptions[0]?.dataset?.name || '',
-      room_id: activeRoom,
-      title: title,
-      schedules: schedules // ส่งชุดเวลาทั้งหมดไปหลังบ้าน
-    };
-    
-    // (โค้ดส่วนบนของ submitBooking เหมือนเดิม... เริ่มแก้ตั้งแต่บรรทัดนี้ลงไป)
-
-    $('submitBtn').disabled = true; $('submitBtn').textContent = 'กำลังส่งข้อมูล...';
-    
-    try {
-      // 🟢 ยิง API ไปที่ GAS เพื่อสร้างการจอง
-      const res = await apiCall('createBooking', payload);
-      
-      $('submitBtn').textContent = 'ส่งคำขอจอง'; updateSummary();
-      
-      if(res && res.ok){
-        Swal.fire({
-          title: 'สำเร็จ!',
-          text: 'การจองของท่านได้รับการยืนยันแล้ว',
-          icon: 'success',
-          confirmButtonText: 'ตกลง',
-          confirmButtonColor: '#10b981'
-        });
-        $('startTime').value=''; $('endTime').value=''; $('endDate').value='';
-        bookedCache = {}; refreshTimePickers(); updateSummary(); loadCalendarData(); 
-      } else { 
-        alert(res?.message || 'เกิดข้อผิดพลาด'); 
-      }
-    } catch (err) {
-      $('submitBtn').textContent = 'ส่งคำขอจอง'; updateSummary(); alert(String(err));
-    }
+ // 🟢 สังเกตตรงนี้ครับ ต้องมีคำว่า async นำหน้า function
+async function submitBooking(){ 
+  const req = $('requester'), st = $('startTime').value, et = $('endTime').value;
+  const title = $('title').value.trim();
+  const d1 = $('date').value;
+  const d2 = $('endDate').value || d1; 
+  
+  const startD = new Date(d1);
+  const endD = new Date(d2);
+  
+  if(endD < startD) { alert("❌ เลือกวันสิ้นสุดใหม่"); return; }
+  
+  // สร้างตารางเวลาของทุกวันที่ถูกเลือก
+  const schedules = [];
+  let cur = new Date(startD);
+  while(cur <= endD) {
+    const dateStr = `${cur.getFullYear()}-${pad2(cur.getMonth()+1)}-${pad2(cur.getDate())}`;
+    schedules.push({
+       start_ms: new Date(`${dateStr}T${st}:00`).getTime(),
+       end_ms: new Date(`${dateStr}T${et}:00`).getTime()
+    });
+    cur.setDate(cur.getDate() + 1); // บวกเพิ่มทีละ 1 วัน
   }
+  
+  const payload = {
+    requester_email: req.value,
+    requester_name: req.selectedOptions[0]?.dataset?.name || '',
+    room_id: activeRoom,
+    title: title,
+    schedules: schedules 
+  };
+  
+  $('submitBtn').disabled = true; $('submitBtn').textContent = 'กำลังส่งข้อมูล...';
+  
+  try {
+    // 🟢 เพราะมีคำว่า await ตรงนี้ บรรทัดแรกสุดถึงต้องมี async ครับ
+    const res = await apiCall('createBooking', payload);
+    
+    $('submitBtn').textContent = 'ส่งคำขอจอง'; updateSummary();
+    
+    if(res && res.ok){
+      Swal.fire({
+        title: 'สำเร็จ!',
+        text: 'การจองของท่านได้รับการยืนยันแล้ว',
+        icon: 'success',
+        confirmButtonText: 'ตกลง',
+        confirmButtonColor: '#10b981'
+      });
+      $('startTime').value=''; $('endTime').value=''; $('endDate').value='';
+      bookedCache = {}; refreshTimePickers(); updateSummary(); loadCalendarData(); 
+    } else { 
+      alert(res?.message || 'เกิดข้อผิดพลาด'); 
+    }
+  } catch (err) {
+    $('submitBtn').textContent = 'ส่งคำขอจอง'; updateSummary(); alert(String(err));
+  }
+}
 
   // =================== ฝั่งปฏิทิน (FullCalendar) ===================
   let calendarInstance = null;
