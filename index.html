@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>จองห้องประชุม STIPI</title>
+  <style>
+    /* 1. ล็อกตัวหน้าเว็บหลักไม่ให้เลื่อนเด็ดขาด */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden; 
+      background-color: #f8fafc; /* สีพื้นหลังโทนเดียวกับระบบจอง */
+    }
+
+    /* 2. จัดการ Iframe ให้เต็มหน้าจอแบบไดนามิก (รองรับแถบเมนูเบราว์เซอร์ที่หดเข้า-ออก) */
+    .app-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100dvh; /* ใช้ dvh (Dynamic Viewport Height) เพื่อให้เต็มจอจริงบนมือถือ */
+      border: none;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+   /* บังคับแก้หน้าจอมือถือให้หายยู่ */
+@media (max-width: 600px) {
+  /* 1. บังคับส่วนของวันที่ให้ซ้อนกันแนวดิ่ง */
+  #dateContainer, 
+  .grid.grid-cols-2, 
+  .flex.gap-4 {
+    display: block !important; /* เปลี่ยนจาก grid/flex เป็น block เพื่อให้มันทับกัน */
+  }
+
+  /* 2. ให้กล่องวันที่แต่ละอันเว้นระยะห่าง และกว้างเต็มจอ */
+  #dateContainer > div,
+  .grid.grid-cols-2 > div,
+  .flex.gap-4 > div {
+    width: 100% !important;
+    margin-bottom: 15px !important;
+  }
+
+  /* 3. ปรับ Input ให้ยาวเต็มพื้นที่ ไม่โดนบีบ */
+  input[type="text"], 
+  select, 
+  .flatpickr-input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 4. แก้ไขป้ายสถานะห้องประชุม (ว่าง/ไม่ว่าง) ให้ไม่ทับชื่อห้อง */
+  .room-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+  
+  .room-card-status {
+    align-self: flex-end !important; /* ให้ป้ายไปอยู่มุมขวาล่างแทนถ้าชื่อยาว */
+  }
+
+  /* 5. ตัวหนังสือตรง label "ถึงวันที่" มันยาวไป ให้เล็กลง */
+  label span {
+    font-size: 11px !important;
+    display: block; /* ให้ข้อความ (จองวันเดียว...) ลงมาอีกบรรทัด */
+  }
+}
+
+    
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <iframe src="https://script.google.com/macros/s/AKfycbyJpYOf93Ch-0rLko38t8aCm9YImnAcK3jV7ODhI29ZjlT8LN7CfLssyOG4WpuDJ4G0/exec"></iframe>
+  </div>
+
+</body>
+</html>
+
